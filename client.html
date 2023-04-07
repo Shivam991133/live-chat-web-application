@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group Chat</title>
+</head>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+
+    const socket = io();
+    function setUserName(){
+        var useName = document.getElementById('Name').value;  
+        
+        if(useName==''){
+            alert("Please Enter Your Name")
+        }else{
+            socket.emit("setName",useName)
+        }
+    }
+    var users;
+    socket.on('userExists',(data)=>{
+        document.getElementById('error').innerHTML = data;
+
+    })
+    socket.on('setUser',(data)=>{
+        users = data.userName;
+        document.getElementById('newUser').innerHTML =
+        `<input type = "text" id= "message">\
+        <button type = "button" onclick = sendMessage()>Send</button>\
+        <div id = "message-container"></div>\
+        `;
+    })
+
+    function sendMessage(){
+        var message = document.getElementById('message').value;
+        if (message!==''){
+            document.getElementById('message').value = '';
+            socket.emit('msg',{message:message,name:users})     
+        }
+    }
+
+    socket.on('newMsg',(data)=>{
+        if(users){
+            document.getElementById('message-container').innerHTML += 
+            `<div>\
+                <br> ${data.name}  ${data.message}\
+            </div>\
+            `
+        }
+
+    })
+    
+  </script>
+<body>
+    <h1>Group Chat Applications</h1>
+    <div id="newUser">
+        <input type="text" id="Name" name="name" placeholder="Please Enter your Name">
+        <button type="button" onclick="setUserName()">Enter in  a Chat Group</button>
+        <div id="error" style="color: red;">
+
+        </div>
+    </div>
+    
+</body>
+</html>
